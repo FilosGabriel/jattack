@@ -11,12 +11,12 @@ import javafx.scene.canvas.GraphicsContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DefaultInvaderManager implements ElementManager {
+public class DefaultElementManager implements ElementManager {
 
     private List<Element> elements;
     private GraphicsContext graphicsContext;
 
-    public DefaultInvaderManager(GraphicsContext graphicsContext) {
+    public DefaultElementManager(GraphicsContext graphicsContext) {
         this.graphicsContext = graphicsContext;
         this.elements = new ArrayList<>();
     }
@@ -42,7 +42,7 @@ public class DefaultInvaderManager implements ElementManager {
     }
 
     @Override
-    public void drawInvader(Element element) {
+    public void drawElement(Element element) {
         emptySpace(element);
         graphicsContext.drawImage(element.getImage(),
                 element.getCoordinates().getX(),

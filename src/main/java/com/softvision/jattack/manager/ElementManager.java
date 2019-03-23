@@ -4,19 +4,19 @@ import com.softvision.jattack.elements.Element;
 
 import java.util.List;
 
-public interface ElementManager<T extends Element> {
+public interface ElementManager {
 
-    void decrementLife(T element);
+    void decrementLife(Element element);
 
-    boolean isAlive(T element);
+    boolean isAlive(Element element);
 
-    void removeElement(T element);
+    void removeElement(Element element);
 
-    void drawInvader(T element);
+    void drawElement(Element element);
 
-    void addElement(T element);
+    void addElement(Element element);
 
-    List<T> getElements();
+    List<Element> getElements();
 
-    void move(T element);
+    void move(Element element);
 }

@@ -3,48 +3,32 @@ package com.softvision.jattack.elements.defender;
 import com.softvision.jattack.coordinates.Coordinates;
 import com.softvision.jattack.coordinates.CoordinatesCache;
 import com.softvision.jattack.coordinates.FixedCoordinates;
+import com.softvision.jattack.elements.Element;
 import com.softvision.jattack.images.ImageLoader;
 import com.softvision.jattack.images.ImageType;
+import com.softvision.jattack.manager.GameManager;
 import com.softvision.jattack.util.Constants;
 import com.softvision.jattack.util.Util;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Defender implements Runnable {
+public class Defender extends Element {
 
     private final Image image = ImageLoader.getImage(ImageType.DEFENDER);
-    private AtomicBoolean gameEnded;
-    private int life;
     private List<Coordinates> bulletsCoordinates;
-    private Coordinates coordinates;
     private EventHandler<KeyEvent> eventHandler;
-    private GraphicsContext graphicsContext;
 
-    public Defender(Coordinates coordinates, AtomicBoolean gameEnded, GraphicsContext graphicsContext) {
-        this.coordinates = coordinates;
-        this.gameEnded = gameEnded;
-        this.life = 5;
+    public Defender(Coordinates coordinates, GameManager gameManager) {
+        super(coordinates, gameManager);
         this.bulletsCoordinates = new ArrayList<>();
         this.eventHandler = new DefenderEventHandler(this);
-        this.graphicsContext = graphicsContext;
-        this.draw();
+        gameManager.draw(this);
     }
 
     public void shoot() {
@@ -54,38 +38,38 @@ public class Defender implements Runnable {
         CoordinatesCache.getInstance().getDefenderBulletsCoordinates().add(bulletCoordinates);
     }
 
-    public boolean wasHit() {
-        boolean wasHit = false;
-
-        Iterator<Coordinates> invaderBulletsCoordinatesIterator = CoordinatesCache.getInstance().getEnemyBulletsCoordinates().iterator();
-        while (invaderBulletsCoordinatesIterator.hasNext()) {
-            Coordinates bulletCoordinates = invaderBulletsCoordinatesIterator.next();
-            int bulletX = bulletCoordinates.getX();
-            int bulletY = bulletCoordinates.getY();
-            if (this.getCoordinates().getX() <= bulletX && bulletX <= this.getCoordinates().getX() + 100) {
-                if (this.getCoordinates().getY() - 10 <= bulletY) {
-                    invaderBulletsCoordinatesIterator.remove();
-                    wasHit = true;
-                    break;
-                }
-            }
-        }
-
-        return wasHit;
-    }
-
-    public void move(KeyCode keyCode) {
-        graphicsContext.clearRect(coordinates.getX(), coordinates.getY(), image.getWidth(), image.getHeight());
+    void move(KeyCode keyCode) {
+        setPreviousPosition(getCoordinates());
         if (keyCode.equals(KeyCode.LEFT) && this.getCoordinates().getX() - 10 > 0) {
             this.getCoordinates().setX(this.getCoordinates().getX() - 10);
         } else if (keyCode.equals(KeyCode.RIGHT) && this.getCoordinates().getX() + 10 < Constants.WIDTH - 100) {
             this.getCoordinates().setX(this.getCoordinates().getX() + 10);
         }
-        draw();
+        gameManager.draw(this);
     }
 
     public Image getImage() {
         return image;
+    }
+
+    @Override
+    public int getBulletHeight() {
+        return 10;
+    }
+
+    @Override
+    public int getBulletWidth() {
+        return 7;
+    }
+
+    @Override
+    public int getBulletVelocity() {
+        return -20;
+    }
+
+    @Override
+    public Color getBulletColor() {
+        return Color.AQUAMARINE;
     }
 
     public EventHandler<KeyEvent> getEventHandler() {
@@ -96,21 +80,9 @@ public class Defender implements Runnable {
         return bulletsCoordinates;
     }
 
-    public Coordinates getCoordinates() {
-        return coordinates;
-    }
-
-    public void decrementLife() {
-        this.life--;
-    }
-
-    public boolean isAlive() {
-        return life > 0;
-    }
-
     @Override
     public void run() {
-        while (!gameEnded.get()) {
+        while (!gameManager.gameEnded()) {
             try {
                 Thread.sleep(Util.getTick());
             } catch (InterruptedException e) {
@@ -118,21 +90,15 @@ public class Defender implements Runnable {
             }
 
             synchronized (Util.lockOn()) {
-                if (this.wasHit()) {
-                    this.decrementLife();
-                    if (!this.isAlive()) {
-                        gameEnded.set(true);
+                if (gameManager.wasHit(this)) {
+                    gameManager.decrementLife(this);
+                    if (!gameManager.isAlive(this)) {
+                        gameManager.setGameEnded(true);
                     }
                 }
+
+                gameManager.draw(this);
             }
         }
-    }
-
-    public void draw() {
-        graphicsContext.drawImage(this.getImage(),
-                this.getCoordinates().getX(),
-                this.getCoordinates().getY(),
-                this.getImage().getWidth(),
-                this.getImage().getHeight());
     }
 }

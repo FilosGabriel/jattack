@@ -2,13 +2,14 @@ package com.softvision.jattack;
 
 import com.softvision.jattack.coordinates.CoordinatesCache;
 import com.softvision.jattack.coordinates.FixedCoordinates;
-import com.softvision.jattack.manager.DefaultInvaderManager;
-import com.softvision.jattack.manager.ElementManager;
 import com.softvision.jattack.elements.Element;
 import com.softvision.jattack.elements.defender.Defender;
-import com.softvision.jattack.images.ImageType;
 import com.softvision.jattack.elements.invaders.InvaderFactory;
 import com.softvision.jattack.images.ImageLoader;
+import com.softvision.jattack.images.ImageType;
+import com.softvision.jattack.manager.DefaultElementManager;
+import com.softvision.jattack.manager.ElementManager;
+import com.softvision.jattack.manager.GameManager;
 import com.softvision.jattack.util.Constants;
 import com.softvision.jattack.util.Util;
 import javafx.application.Application;
@@ -28,14 +29,12 @@ import javafx.stage.Stage;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class JAttack extends Application implements Runnable {
     private final Thread gameThread;
     private Set<Thread> invaderThreads;
     private GraphicsContext graphicsContext;
     private Defender defender;
-    private AtomicBoolean gameEnded = new AtomicBoolean();
     private ElementManager invadersManager;
     private GameManager gameManager;
 
@@ -57,7 +56,7 @@ public class JAttack extends Application implements Runnable {
         Group root = new Group();
         Canvas canvas = new Canvas(Constants.WIDTH, Constants.HEIGHT);
         graphicsContext = canvas.getGraphicsContext2D();
-        invadersManager = new DefaultInvaderManager(graphicsContext);
+        invadersManager = new DefaultElementManager(graphicsContext);
         gameManager = new GameManager(invadersManager);
 
         invaderThreads = generateInvaderThreads();
@@ -67,7 +66,7 @@ public class JAttack extends Application implements Runnable {
 
         root.getChildren().add(holder);
 
-        defender = new Defender(new FixedCoordinates((Constants.WIDTH / 2) - 50, Constants.HEIGHT - 150), gameEnded, graphicsContext);
+        defender = new Defender(new FixedCoordinates((Constants.WIDTH / 2) - 50, Constants.HEIGHT - 150), gameManager);
         Thread defenderThread = new Thread(defender);
 
         ImagePattern backgroundImage = new ImagePattern(ImageLoader.getImage(ImageType.BACKGROUND));
@@ -83,7 +82,7 @@ public class JAttack extends Application implements Runnable {
             System.exit(0);
         });
 
-        invadersManager.getElements().forEach(e -> invadersManager.drawInvader(e));
+        invadersManager.getElements().forEach(e -> invadersManager.drawElement(e));
 
         primaryStage.show();
         gameThread.start();
@@ -99,7 +98,7 @@ public class JAttack extends Application implements Runnable {
 
     @Override
     public void run() {
-        while (!gameEnded.get()) {
+        while (!gameManager.gameEnded()) {
             try {
                 Thread.sleep(Util.getTick());
             } catch (InterruptedException e) {
@@ -137,19 +136,19 @@ public class JAttack extends Application implements Runnable {
     private Set<Thread> generateInvaderThreads() {
         Set<Thread> threads = new HashSet<>();
         for (int i = 0; i < Constants.NUMBER_OF_PLANES; i++) {
-            Element element = InvaderFactory.generateElement(ImageType.PLANE, gameEnded, gameManager);
+            Element element = InvaderFactory.generateElement(ImageType.PLANE, gameManager);
             invadersManager.addElement(element);
             threads.add(new Thread(element));
         }
 
         for (int i = 0; i < Constants.NUMBER_OF_TANKS; i++) {
-            Element element = InvaderFactory.generateElement(ImageType.TANK, gameEnded, gameManager);
+            Element element = InvaderFactory.generateElement(ImageType.TANK, gameManager);
             invadersManager.addElement(element);
             threads.add(new Thread(element));
         }
 
         for (int i = 0; i < Constants.NUMBER_OF_HELICOPTERS; i++) {
-            Element element = InvaderFactory.generateElement(ImageType.HELICOPTER, gameEnded, gameManager);
+            Element element = InvaderFactory.generateElement(ImageType.HELICOPTER, gameManager);
             invadersManager.addElement(element);
             threads.add(new Thread(element));
         }

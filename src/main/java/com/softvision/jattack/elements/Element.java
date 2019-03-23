@@ -1,27 +1,24 @@
 package com.softvision.jattack.elements;
 
-import com.softvision.jattack.GameManager;
 import com.softvision.jattack.coordinates.Coordinates;
 import com.softvision.jattack.coordinates.CoordinatesCache;
+import com.softvision.jattack.manager.GameManager;
 import com.softvision.jattack.util.Util;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class Element implements Runnable {
-    private AtomicBoolean gameEnded;
     private int life;
     private List<Coordinates> bulletsCoordinates;
     private Coordinates coordinates;
     private Coordinates previousPosition;
-    private GameManager gameManager;
+    protected GameManager gameManager;
 
-    public Element(Coordinates coordinates, AtomicBoolean gameEnded, GameManager gameManager) {
+    public Element(Coordinates coordinates, GameManager gameManager) {
         this.coordinates = coordinates;
-        this.gameEnded = gameEnded;
         this.life = 3;
         this.bulletsCoordinates = new ArrayList<>();
         this.gameManager = gameManager;
@@ -73,7 +70,7 @@ public abstract class Element implements Runnable {
     public abstract void shoot();
 
     public void run() {
-        while (!gameEnded.get() && gameManager.isAlive(this)) {
+        while (!gameManager.gameEnded() && gameManager.isAlive(this)) {
             try {
                 Thread.sleep(Util.getTick());
             } catch (InterruptedException e) {

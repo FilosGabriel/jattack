@@ -1,21 +1,19 @@
 package com.softvision.jattack.elements.invaders;
 
-import com.softvision.jattack.GameManager;
 import com.softvision.jattack.coordinates.Coordinates;
 import com.softvision.jattack.coordinates.FixedCoordinates;
 import com.softvision.jattack.elements.Element;
 import com.softvision.jattack.images.ImageLoader;
 import com.softvision.jattack.images.ImageType;
+import com.softvision.jattack.manager.GameManager;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Tank extends Element {
     private final Image image = ImageLoader.getImage(ImageType.TANK);
 
-    Tank(Coordinates coordinates, AtomicBoolean gameEnded, GameManager gameManager) {
-        super(coordinates, gameEnded, gameManager);
+    Tank(Coordinates coordinates, GameManager gameManager) {
+        super(coordinates, gameManager);
     }
 
     @Override
