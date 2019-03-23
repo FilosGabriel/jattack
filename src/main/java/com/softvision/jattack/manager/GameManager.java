@@ -11,11 +11,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameManager {
 
-    private ElementManager invadersManager;
+    private ElementManager elementsManager;
     private AtomicBoolean gameEnded;
 
-    public GameManager(ElementManager invadersManager) {
-        this.invadersManager = invadersManager;
+    public GameManager(ElementManager elementsManager) {
+        this.elementsManager = elementsManager;
         this.gameEnded = new AtomicBoolean(false);
     }
 
@@ -24,24 +24,25 @@ public class GameManager {
         if (shouldShoot) {
             element.shoot();
         } else {
-            invadersManager.move(element);
+            elementsManager.move(element);
         }
 
-        invadersManager.drawElement(element);
+        elementsManager.drawElement(element);
+        elementsManager.drawElementBullets(element);
     }
 
     public boolean isAlive(Element element) {
-        if (!invadersManager.isAlive(element)) {
-            invadersManager.removeElement(element);
+        if (!elementsManager.isAlive(element)) {
+            elementsManager.removeElement(element);
         }
 
-        return invadersManager.isAlive(element);
+        return elementsManager.isAlive(element);
     }
 
     public void decrementLife(Element element) {
-        invadersManager.decrementLife(element);
+        elementsManager.decrementLife(element);
         if(!isAlive(element)) {
-            invadersManager.removeElement(element);
+            elementsManager.removeElement(element);
         }
     }
 
@@ -83,7 +84,11 @@ public class GameManager {
     }
 
     public void draw(Element element) {
-        invadersManager.drawElement(element);
+        elementsManager.drawElement(element);
+    }
+
+    public void drawElementBullets(Element element) {
+        elementsManager.drawElementBullets(element);
     }
 
     public boolean gameEnded() {
@@ -92,5 +97,11 @@ public class GameManager {
 
     public void setGameEnded(boolean gameEnded) {
         this.gameEnded.set(gameEnded);
+    }
+
+    public void clearElement(Element element) {
+        element.setPreviousPosition(element.getCoordinates());
+        elementsManager.emptySpace(element);
+        elementsManager.cleanBullets(element);
     }
 }

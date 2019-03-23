@@ -49,7 +49,10 @@ public class DefaultElementManager implements ElementManager {
                 element.getCoordinates().getY(),
                 element.getImage().getWidth(),
                 element.getImage().getHeight());
+    }
 
+    @Override
+    public void drawElementBullets(Element element){
         element.getBulletsCoordinates().forEach(c ->  {
             graphicsContext.clearRect(c.getX(), c.getY(), element.getBulletWidth(), element.getBulletHeight());
             graphicsContext.setFill(element.getBulletColor());
@@ -73,13 +76,19 @@ public class DefaultElementManager implements ElementManager {
         }
     }
 
-    private void emptySpace(Element element) {
+    @Override
+    public void emptySpace(Element element) {
         if(element.getPreviousPosition() != null) {
             graphicsContext.clearRect(element.getPreviousPosition().getX(),
                     element.getPreviousPosition().getY(),
                     element.getImage().getWidth(),
                     element.getImage().getHeight());
         }
+    }
+
+    @Override
+    public void cleanBullets(Element element) {
+        element.getBulletsCoordinates().forEach(b -> graphicsContext.clearRect(b.getX(), b.getY(), element.getBulletWidth(), element.getBulletHeight()));
     }
 
     private boolean canMoveToDirection(Element element, Coordinates newCoordinates) {

@@ -14,9 +14,15 @@ public interface ElementManager {
 
     void drawElement(Element element);
 
+    void drawElementBullets(Element element);
+
     void addElement(Element element);
 
     List<Element> getElements();
 
     void move(Element element);
+
+    void emptySpace(Element element);
+
+    void cleanBullets(Element element);
 }

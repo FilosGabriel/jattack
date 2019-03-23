@@ -97,7 +97,7 @@ public class Defender extends Element {
                     }
                 }
 
-                gameManager.draw(this);
+                gameManager.drawElementBullets(this);
             }
         }
     }

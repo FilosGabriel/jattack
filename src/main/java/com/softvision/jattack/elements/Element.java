@@ -86,5 +86,7 @@ public abstract class Element implements Runnable {
                 gameManager.choseAndExecuteAction(this);
             }
         }
+
+        gameManager.clearElement(this);
     }
 }
